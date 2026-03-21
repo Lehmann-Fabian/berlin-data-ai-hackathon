@@ -1,0 +1,12 @@
+db_team_<n>:
+  outputs:
+    dev:
+      type: snowflake
+      account: '{{ env_var("DBT_ACCOUNT") }}'
+      user: '{{ env_var("DBT_USER) }}'
+      password: '{{ env_var("DBT_PASSWORD") }}'
+      database: DB_TEAM_<N>          # ← your team's private database (e.g. DB_TEAM_1)
+      schema: base
+      warehouse: WH_TEAM_<N>_XS     # ← your team's warehouse (e.g. WH_TEAM_1_XS)
+      threads: 4
+  target: dev
