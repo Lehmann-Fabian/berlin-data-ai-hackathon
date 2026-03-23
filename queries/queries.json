@@ -23,5 +23,30 @@
     "description": "Recommendations for family movie night",
     "sql": "select title, year, age_group, score from family_movie_recommendations where age_group = %s order by score desc limit %s",
     "params": ["age_group", "limit"]
+  },
+  "top_movies_around_date": {
+    "description": "Top movies around a specific date (±14 days), ranked with triangular weighting (best for Xmas-style prompts)",
+    "sql": "select movie_title, weighted_clickouts_29d, window_rank, poster_jw, url_imdb, url_tmdb from marts.mart_movie_popularity_rolling_29d_top20 where app_locale = %s and anchor_date = %s and genre_bucket = %s order by window_rank limit %s",
+    "params": ["app_locale", "anchor_date", "genre_bucket", "limit"]
+  },
+  "top_movies_around_date_by_keyword": {
+    "description": "Top movies around a date matching a keyword (simple text match on title/description)",
+    "sql": "select movie_title, weighted_clickouts_29d, window_rank, poster_jw, url_imdb, url_tmdb from marts.mart_movie_popularity_rolling_29d_top20 where app_locale = %s and anchor_date = %s and genre_bucket = '__all__' and (movie_title ilike '%%' || %s || '%%' or short_description ilike '%%' || %s || '%%' or object_text_short_description ilike '%%' || %s || '%%' or genres ilike '%%' || %s || '%%') order by weighted_clickouts_29d desc limit %s",
+    "params": ["app_locale", "anchor_date", "keyword", "keyword", "keyword", "keyword", "limit"]
+  },
+  "daily_trending_movies": {
+    "description": "Daily trending movies for a specific day (top 50 per day/market, unweighted)",
+    "sql": "select movie_title, clickouts, daily_rank, poster_jw, url_imdb, url_tmdb from marts.mart_movie_popularity_daily_top50 where app_locale = %s and event_date = %s order by daily_rank limit %s",
+    "params": ["app_locale", "event_date", "limit"]
+  },
+  "movie_details_by_object_id": {
+    "description": "Fetch movie details (description, poster, external URLs) by JustWatch object_id (tm...)",
+    "sql": "select object_id, title as movie_title, original_title, translated_title, release_year, imdb_score, short_description, object_text_short_description, poster_jw, url_imdb, url_tmdb from marts.dim_titles where object_id = %s and object_type = 'movie' limit 1",
+    "params": ["object_id"]
+  },
+  "top_providers_in_date_window": {
+    "description": "Top streaming providers by clickouts in a date window (useful for 'where are people watching around Xmas?')",
+    "sql": "select p.clear_name as provider_name, c.clickout_monetization_type as monetization_type, count(*) as clickouts from marts.fct_clickouts c join marts.dim_providers p on c.clickout_provider_id = p.id where c.app_locale = %s and c.event_date between %s and %s group by 1, 2 order by clickouts desc limit %s",
+    "params": ["app_locale", "start_date", "end_date", "limit"]
   }
 }

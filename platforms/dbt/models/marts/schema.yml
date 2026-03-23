@@ -202,6 +202,75 @@ models:
         description: Display title for the movie.
       - name: genres
         description: Comma-separated TMDB genres for the movie.
+      - name: runtime_minutes
+        description: Movie runtime in minutes (from OBJECTS.runtime).
+      - name: poster_jw
+        description: JustWatch poster image URL.
+      - name: url_imdb
+        description: Full IMDb URL for the title (when available).
+      - name: url_tmdb
+        description: Full TMDB URL for the title (when available).
+
+  - name: mart_movie_popularity_seasonal_ddmm_top20
+    description: >
+      Multi-year seasonal movie popularity ranks anchored to day+month (DD.MM), aggregated across
+      all dataset years. Output is Top 20 movies per (anchor_ddmm, app_locale, genre_bucket) based
+      on a ±14-day rolling window around each year's anchor date and triangular weighting.
+    columns:
+      - name: anchor_ddmm
+        description: Yearless anchor (DD.MM), e.g. '25.12' for Xmas across years.
+        tests:
+          - not_null
+      - name: anchor_day
+        description: Day of month for the yearless anchor.
+        tests:
+          - not_null
+      - name: anchor_month
+        description: Month for the yearless anchor.
+        tests:
+          - not_null
+      - name: anchor_day_date
+        description: Anchor represented as a date in a fixed reference year (for charting/sorting).
+        tests:
+          - not_null
+      - name: app_locale
+        description: User-selected market (may be NULL on some events).
+      - name: genre_bucket
+        description: Genre bucket identifier ('__all__', single genre, or curated bucket).
+        tests:
+          - not_null
+      - name: object_id
+        description: Movie object id (joins to dim_titles.object_id).
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_titles')
+                field: object_id
+      - name: clickouts_29d_sum
+        description: Unweighted clickouts in the ±14-day window, summed across years.
+        tests:
+          - not_null
+      - name: weighted_clickouts_29d_sum
+        description: Triangular-weighted clickouts in the ±14-day window, summed across years.
+        tests:
+          - not_null
+      - name: years_covered
+        description: Number of distinct dataset years contributing to this row.
+        tests:
+          - not_null
+      - name: window_rank
+        description: >
+          Rank (1..20) within (anchor_ddmm, app_locale, genre_bucket) by weighted_clickouts_29d_sum
+          (triangular weighting), with clickouts_29d_sum as a tie-breaker.
+        tests:
+          - not_null
+      - name: seasonal_popularity_id
+        description: Stable identifier for (anchor_ddmm, app_locale, genre_bucket, object_id).
+      - name: movie_title
+        description: Display title for the movie.
+      - name: genres
+        description: Comma-separated TMDB genres for the movie.
       - name: poster_jw
         description: JustWatch poster image URL.
       - name: url_imdb

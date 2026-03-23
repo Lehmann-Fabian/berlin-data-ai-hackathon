@@ -48,3 +48,5 @@ models:
         +materialized: table
       mart_movie_popularity_rolling_29d_top20:
         +materialized: table
+      mart_movie_popularity_seasonal_ddmm_top20:
+        +materialized: table

@@ -127,6 +127,19 @@ Ranking uses `weighted_clickouts_29d` first (then `clickouts_29d` as a tie-break
 - single-genre buckets like `Comedy`
 - curated multi-genre buckets like `RomCom` (Romance + Comedy)
 
+### C) Seasonal popularity (across years)
+
+Model: `marts.mart_movie_popularity_seasonal_ddmm_top20`
+
+Use this when you want recommendations anchored to a **day+month**, aggregated across all dataset years
+(e.g. “top Xmas movies across years”).
+
+How it ranks:
+- choose an `anchor_ddmm` like `25.12`
+- for each year in the dataset, build a real anchor date (e.g. `2025-12-25`) and compute the same ±14-day window
+- apply triangular weighting within each year, then **sum across years**
+- rank movies within `(anchor_ddmm, app_locale, genre_bucket)`
+
 ## OpenClaw chatbot: query recipes (copy/paste)
 
 Below are examples against the rolling mart (recommended for recommendations).
@@ -156,6 +169,24 @@ from marts.mart_movie_popularity_rolling_29d_top20
 where app_locale = :app_locale
   and anchor_date = :anchor_date
   and genre_bucket = 'RomCom'
+order by window_rank
+limit 10;
+```
+
+### 4) Top movies for a seasonal date across years (e.g. Xmas)
+
+```sql
+select
+  movie_title,
+  weighted_clickouts_29d_sum,
+  years_covered,
+  poster_jw,
+  url_imdb,
+  url_tmdb
+from marts.mart_movie_popularity_seasonal_ddmm_top20
+where app_locale = :app_locale
+  and anchor_ddmm = :anchor_ddmm
+  and genre_bucket = '__all__'
 order by window_rank
 limit 10;
 ```

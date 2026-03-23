@@ -12,6 +12,7 @@ CineClaw dbt pipeline: staging→intermediate→marts for JustWatch telemetry; b
 - [ ] R4: Provide a minimal dbt Semantic Layer definition over the clickout fact with measures: clickouts, unique_users, unique_sessions.
 - [ ] R5: Add dbt tests enforcing primary keys, relationships, and basic accepted-values checks for core categorical fields used by downstream consumers.
 - [ ] R6: Provide a rolling-window popularity mart (±14 days) ranked by market and genre buckets for chatbot recommendations (e.g., “around Xmas”).
+- [ ] R7: Provide a yearless (DD.MM) seasonal popularity mart aggregated across all dataset years for recurring date recommendations (e.g., “Xmas across years”).
 
 ## Acceptance Criteria
 
@@ -21,6 +22,7 @@ CineClaw dbt pipeline: staging→intermediate→marts for JustWatch telemetry; b
 4. (AC-4) A semantic model definition exists over `fct_clickouts` and includes measures `clickouts`, `unique_users`, `unique_sessions` and core dimensions for Lightdash/ad-hoc analysis.
 5. (AC-5) dbt tests exist: PK uniqueness/not_null for clickouts (`rid`), relationships for title/provider keys, and accepted-values checks for `platform`, `event`, and `se_category` on `fct_clickouts`.
 6. (AC-6) `mart_movie_popularity_rolling_29d_top20` exists as a dbt-refreshed table and provides Top 20 movies per (anchor_date, app_locale, genre_bucket) based on clickouts in the ±14 day window.
+7. (AC-7) `mart_movie_popularity_seasonal_ddmm_top20` exists as a dbt-refreshed table and provides Top 20 movies per (anchor_ddmm, app_locale, genre_bucket), aggregating weighted ±14 day windows across all dataset years.
 
 ## Non-Functional Requirements
 

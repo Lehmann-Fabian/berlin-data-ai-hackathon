@@ -66,6 +66,9 @@ Use the daily popularity mart `marts.mart_movie_popularity_daily_top50` to answe
 For “around a date” recommendations with a rolling ±14 day window (recommended for the chatbot),
 use `marts.mart_movie_popularity_rolling_29d_top20`.
 
+For “Xmas across years” (or any recurring seasonal date), use the yearless seasonal mart
+`marts.mart_movie_popularity_seasonal_ddmm_top20` and filter by `anchor_ddmm` (e.g. `25.12`).
+
 **Suggested Explore setup:**
 - Explore: `mart_movie_popularity_daily_top50`
 - Filter: `event_date` between your desired dates
@@ -78,6 +81,13 @@ use `marts.mart_movie_popularity_rolling_29d_top20`.
 - Filter: `anchor_date` = your target date (e.g. Dec 25)
 - Filter: `genre_bucket` = `__all__` (or a specific genre/bucket like `RomCom`)
 - Metric: `weighted_clickouts_29d` (sum)
+- Dimension: `movie_title`
+
+**Suggested Explore setup (seasonal, across years):**
+- Explore: `mart_movie_popularity_seasonal_ddmm_top20`
+- Filter: `anchor_ddmm` = `25.12` (or any `DD.MM`)
+- Filter: `genre_bucket` = `__all__` (or a specific genre/bucket like `RomCom`)
+- Metric: `weighted_clickouts_29d_sum` (sum)
 - Dimension: `movie_title`
 
 **Chart options:**
