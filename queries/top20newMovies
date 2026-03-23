@@ -1,0 +1,101 @@
+CREATE OR REPLACE TABLE DB_TEAM_9.PUBLIC.monthly_top20_recent_movies AS
+
+WITH anchor_dates AS (
+    SELECT '2026-01-01'::DATE AS anchor_date
+    UNION ALL SELECT '2026-02-01'::DATE
+    UNION ALL SELECT '2026-03-01'::DATE
+    UNION ALL SELECT '2026-04-01'::DATE
+    UNION ALL SELECT '2026-05-01'::DATE
+    UNION ALL SELECT '2026-06-01'::DATE
+    UNION ALL SELECT '2026-07-01'::DATE
+    UNION ALL SELECT '2026-08-01'::DATE
+    UNION ALL SELECT '2026-09-01'::DATE
+    UNION ALL SELECT '2026-10-01'::DATE
+    UNION ALL SELECT '2026-11-01'::DATE
+    UNION ALL SELECT '2026-12-01'::DATE
+),
+
+recent_movies AS (
+    SELECT
+        d.anchor_date,
+        o.object_id,
+        o.title,
+        o.original_title,
+        o.release_year,
+        o.release_date,
+        o.imdb_score,
+        o.runtime,
+        o.genre_tmdb,
+        o.poster_jw,
+        o.url_imdb
+    FROM anchor_dates d
+    JOIN DB_JW_SHARED.CHALLENGE.OBJECTS o
+        ON LOWER(o.object_type) = 'movie'
+       AND o.release_date >= DATEADD('MONTH', -6, d.anchor_date)
+       AND o.release_date < d.anchor_date
+       AND o.imdb_score IS NOT NULL
+       AND o.imdb_score < 8.5
+       AND o.parent_id IS NULL
+       AND o.poster_jw IS NOT NULL
+       AND o.runtime > 15
+       AND ARRAY_SIZE(o.genre_tmdb) > 0
+),
+
+watched AS (
+    SELECT
+        m.anchor_date,
+        m.object_id,
+        m.title,
+        m.original_title,
+        m.release_year,
+        m.release_date,
+        m.imdb_score,
+        m.runtime,
+        m.genre_tmdb,
+        m.poster_jw,
+        m.url_imdb,
+        COUNT(*) AS watch_count
+    FROM recent_movies m
+    JOIN DB_JW_SHARED.CHALLENGE.T1 t
+        ON t.cc_title:jwEntityId::STRING = m.object_id
+    GROUP BY
+        m.anchor_date,
+        m.object_id,
+        m.title,
+        m.original_title,
+        m.release_year,
+        m.release_date,
+        m.imdb_score,
+        m.runtime,
+        m.genre_tmdb,
+        m.poster_jw,
+        m.url_imdb
+),
+
+ranked AS (
+    SELECT
+        *,
+        ROW_NUMBER() OVER (
+            PARTITION BY anchor_date
+            ORDER BY watch_count DESC
+        ) AS rank
+    FROM watched
+)
+
+SELECT
+    anchor_date,
+    rank,
+    object_id,
+    title,
+    original_title,
+    release_year,
+    release_date,
+    imdb_score,
+    runtime,
+    genre_tmdb,
+    poster_jw,
+    url_imdb,
+    watch_count
+FROM ranked
+WHERE rank <= 20
+ORDER BY anchor_date, rank;

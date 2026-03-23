@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: movie-api
+  datasource:
+    driver-class-name: net.snowflake.client.jdbc.SnowflakeDriver
+    url: ${SPRING_DATASOURCE_URL:jdbc:snowflake://<ACCOUNT_ID>.snowflakecomputing.com/?db=DB_JW_SHARED&schema=CHALLENGE&warehouse=WH_TEAM_1_XS}
+    username: ${SPRING_DATASOURCE_USERNAME:<your-email>}
+    password: ${SPRING_DATASOURCE_PASSWORD:<your-password>}
+    hikari:
+      data-source-properties:
+        JDBC_QUERY_RESULT_FORMAT: JSON
+server:
+  port: ${SERVER_PORT:8080}
