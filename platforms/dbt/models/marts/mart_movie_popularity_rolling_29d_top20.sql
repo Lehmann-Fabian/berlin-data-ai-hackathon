@@ -110,6 +110,7 @@ movies as (
         poster_jw,
         url_imdb,
         url_tmdb,
+        release_date,
         release_year,
         imdb_score
     from {{ ref('dim_titles') }}
@@ -161,6 +162,10 @@ ranked as (
     from unioned u
     join movies m
       on u.object_id = m.object_id
+     and (
+         m.release_date is null
+         or dateadd('month', 6, m.release_date) <= u.anchor_date
+     )
     left join movie_genres g
       on u.object_id = g.object_id
 

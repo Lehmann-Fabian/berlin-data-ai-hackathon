@@ -42,6 +42,9 @@ models:
     marts:
       +materialized: view
       +schema: marts
+      openclaw:
+        +materialized: table
+        +schema: openclaw
       mart_popular_movies_dataset_period:
         +materialized: table
       mart_movie_popularity_daily_top50:
