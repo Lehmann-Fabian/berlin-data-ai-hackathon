@@ -8,7 +8,7 @@
 
 {{ config(materialized='table') }}
 
-{% set events_model = var('time_spine_events_model', 'base_events_t1') %}
+{% set events_model = var('time_spine_events_model', 'base_events_union') %}
 
 with bounds as (
 

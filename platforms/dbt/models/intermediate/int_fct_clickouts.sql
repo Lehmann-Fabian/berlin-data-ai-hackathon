@@ -3,21 +3,39 @@
 -- "Watched" proxy: clickout events only (se_category='clickout').
 -- Bot handling: staging retains bots; intermediate filters them out.
 --
--- Defaults to T1-derived staging model for cost. Override with:
+-- Defaults to a unioned staging model for expanded coverage (T1 + T1_5 by default). Override with:
 --   dbt build --select int_fct_clickouts --vars '{"events_model": "base_events_t4"}'
 
-{% set events_model = var('events_model', 'base_events_t1') %}
+{% set events_model = var('events_model', 'base_events_union') %}
+
+{% set label_map = {
+    'base_events_t1': 'T1',
+    'base_events_t1_5': 'T1_5',
+    'base_events_t2': 'T2',
+    'base_events_t3': 'T3',
+    'base_events_t4': 'T4'
+} %}
 
 with events as (
 
-    select *
-    from {{ ref(events_model) }}
+    {% if events_model == 'base_events_union' %}
+        select *
+        from {{ ref(events_model) }}
+    {% else %}
+        select
+            '{{ label_map.get(events_model, events_model) }}' as event_source,
+            e.*
+        from {{ ref(events_model) }} e
+    {% endif %}
 
 ),
 
 clickouts as (
 
     select
+        event_source,
+        event_source || '_' || rid::varchar            as clickout_event_id,
+
         rid,
         collector_tstamp,
         derived_tstamp,

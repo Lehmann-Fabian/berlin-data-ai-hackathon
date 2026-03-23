@@ -82,6 +82,11 @@ sources:
               OBJECT. Search context — present on search-related events.
               Key field: cc_search:searchEntry::TEXT (the query string typed by the user).
 
+      - name: T1_5
+        description: >
+          Snowplow event stream — same schema as T1–T4.
+        columns: *event_columns
+
       - name: T2
         description: >
           Snowplow event stream — 8 EU markets, December 2025. ~40M rows, 5.7 GB.

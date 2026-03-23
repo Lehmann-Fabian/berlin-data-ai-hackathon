@@ -41,11 +41,19 @@ models:
   - name: fct_clickouts
     description: BI-facing clickout fact at event grain, filtered to human traffic.
     columns:
-      - name: rid
-        description: Primary key for the clickout event row.
+      - name: clickout_event_id
+        description: Primary key for the clickout event row (event_source + rid).
         tests:
           - not_null
           - unique
+      - name: event_source
+        description: Source event table label used to keep identifiers unique across unioned inputs (e.g., 'T1', 'T1_5').
+        tests:
+          - not_null
+      - name: rid
+        description: Internal row identifier within a source table. Use for deduplication (preferred over event_id).
+        tests:
+          - not_null
       - name: title_jw_entity_id
         description: >
           Title join key to OBJECTS.object_id (see staging `sources.yml` join guidance).

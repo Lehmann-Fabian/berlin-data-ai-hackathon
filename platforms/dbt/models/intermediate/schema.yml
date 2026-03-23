@@ -6,11 +6,19 @@ models:
       Intermediate clickout fact at event grain (one row per clickout event),
       filtered to human traffic (not bots) and enriched with market and provider keys.
     columns:
-      - name: rid
-        description: Unique row identifier from the source event stream; primary key for the fact.
+      - name: clickout_event_id
+        description: Primary key for the clickout event row (event_source + rid).
         tests:
           - not_null
           - unique
+      - name: event_source
+        description: Source event table label used to keep identifiers unique across unioned inputs (e.g., 'T1', 'T1_5').
+        tests:
+          - not_null
+      - name: rid
+        description: Internal row identifier within a source table. Use for deduplication (preferred over event_id).
+        tests:
+          - not_null
       - name: title_jw_entity_id
         description: Join key to title metadata (OBJECTS.object_id), derived from cc_title:jwEntityId.
         tests:
