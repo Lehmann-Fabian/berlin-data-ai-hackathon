@@ -75,6 +75,29 @@ Cluster users into meaningful audience segments based on their behaviour — the
 
 ---
 
+## 6. JustWatch as a Streaming Provider — Content Licensing Intelligence
+
+JustWatch recently launched its own streaming offering — AVOD (ad-supported free streaming) and TVOD (transactional rent/buy) — currently in alpha. The question every streaming provider faces: **which titles are worth licensing?**
+
+You have the demand signals to answer that.
+
+**The challenge:**
+- Estimate **AVOD potential**: which titles generate enough user interest to justify licensing and hosting costs through ad-supported view hours? Look at engagement depth (page views, watchlist adds, clickouts to `free`/`ads` offers) as proxies for viewing demand
+- Estimate **TVOD potential**: which titles show strong rent/buy intent? Clickouts with `se_action` in (`rent`, `buy`) are direct transactional demand signals
+- Build a **licensing priority model**: rank titles by estimated revenue potential vs. likely licensing cost (use IMDB popularity, release recency, and content type as cost proxies)
+- Identify **cross-market opportunities**: titles with strong demand across multiple countries offer better licensing ROI than single-market hits
+- Find **underserved demand**: titles with high user interest but few or no current streaming offers — these are gaps a new provider can fill
+
+**Analytical angles:**
+- Compare demand patterns for titles currently available only via rent/buy vs. those on subscription services — which TVOD-only titles could be AVOD winners?
+- Genre analysis: which genres perform best in AVOD (high volume, rewatchable) vs. TVOD (premium, event-driven)?
+- Seasonality: do licensing opportunities shift during holiday periods? (The data covers Nov–Jan)
+- Market entry strategy: if JustWatch launches AVOD in one country first, which market has the strongest demand-to-supply gap?
+
+**Why this matters:** Content acquisition is the single largest cost for any streaming service. A data-driven licensing strategy — built on actual user demand signals rather than gut feel — is exactly what separates successful providers from those burning cash on content nobody watches.
+
+---
+
 ## Your Own Idea
 
 The data is yours. Some prompts if you want to go your own direction:
