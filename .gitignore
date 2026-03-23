@@ -1,6 +1,9 @@
 # Claude Code — personal/local settings
 .claude/settings.local.json
 
+# Python virtualenv
+.venv/
+
 # Logs
 logs/
 *.log
