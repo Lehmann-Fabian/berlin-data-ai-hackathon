@@ -277,3 +277,41 @@ models:
         description: Full IMDb URL for the title (when available).
       - name: url_tmdb
         description: Full TMDB URL for the title (when available).
+
+  - name: mart_seasonal_window_movie_recommendations_top10
+    description: >
+      Top 10 movie recommendations per curated seasonal window (2026). Each row is a movie scored
+      by genre matches (higher weight) and description keyword matches (lower weight), with IMDb
+      score used as a tie-breaker signal. This table is intended for fast app/website queries.
+    columns:
+      - name: start_date
+        description: Window start date (inclusive).
+        tests:
+          - not_null
+      - name: until_date
+        description: Window end date (inclusive).
+        tests:
+          - not_null
+      - name: period_description
+        description: Human-readable label for the window.
+      - name: object_id
+        description: Movie object id (joins to dim_titles.object_id).
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_titles')
+                field: object_id
+      - name: total_score
+        description: Weighted score combining genre matches, keyword matches, and IMDb score.
+        tests:
+          - not_null
+      - name: window_rank
+        description: Rank (1..10) within (start_date, until_date) by total_score.
+        tests:
+          - not_null
+
+  - name: mart_movie_recommendations_for_search_date
+    description: >
+      Convenience view that returns the Top 10 scored movie recommendations for a single
+      build-time `search_date` (passed via dbt `--vars`). Output columns match the app query shape.

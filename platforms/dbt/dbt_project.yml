@@ -50,3 +50,5 @@ models:
         +materialized: table
       mart_movie_popularity_seasonal_ddmm_top20:
         +materialized: table
+      mart_seasonal_window_movie_recommendations_top10:
+        +materialized: table
