@@ -1,0 +1,27 @@
+{
+  "personalized_recommendations": {
+    "description": "Personalized movie recommendations for a user",
+    "sql": "select title, year, genre, score, reason from movie_recommendations_for_user where user_id = %s order by score desc limit %s",
+    "params": ["user_id", "limit"]
+  },
+  "similar_movies": {
+    "description": "Movies similar to a given title",
+    "sql": "select recommended_title, year, genre, similarity_score from similar_movies where source_title = %s order by similarity_score desc limit %s",
+    "params": ["movie_title", "limit"]
+  },
+  "recommendations_by_genre": {
+    "description": "Top recommendations for a genre",
+    "sql": "select title, year, score from genre_recommendations where genre = %s order by score desc limit %s",
+    "params": ["genre", "limit"]
+  },
+  "recommendations_by_mood": {
+    "description": "Top recommendations for a mood",
+    "sql": "select title, year, mood, score from mood_recommendations where mood = %s order by score desc limit %s",
+    "params": ["mood", "limit"]
+  },
+  "family_movie_night": {
+    "description": "Recommendations for family movie night",
+    "sql": "select title, year, age_group, score from family_movie_recommendations where age_group = %s order by score desc limit %s",
+    "params": ["age_group", "limit"]
+  }
+}
