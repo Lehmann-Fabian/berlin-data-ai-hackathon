@@ -27,7 +27,8 @@ recent_movies AS (
         o.runtime,
         o.genre_tmdb,
         o.poster_jw,
-        o.url_imdb
+        o.url_imdb,
+        o.short_description
     FROM anchor_dates d
     JOIN DB_JW_SHARED.CHALLENGE.OBJECTS o
         ON LOWER(o.object_type) = 'movie'
@@ -54,6 +55,7 @@ watched AS (
         m.genre_tmdb,
         m.poster_jw,
         m.url_imdb,
+        m.short_description,
         COUNT(*) AS watch_count
     FROM recent_movies m
     JOIN DB_JW_SHARED.CHALLENGE.T1 t
@@ -69,7 +71,8 @@ watched AS (
         m.runtime,
         m.genre_tmdb,
         m.poster_jw,
-        m.url_imdb
+        m.url_imdb,
+        m.short_description
 ),
 
 ranked AS (
@@ -95,6 +98,7 @@ SELECT
     genre_tmdb,
     poster_jw,
     url_imdb,
+    short_description,
     watch_count
 FROM ranked
 WHERE rank <= 20

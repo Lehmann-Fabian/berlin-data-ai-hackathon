@@ -11,6 +11,7 @@ SELECT
     genre_tmdb,
     poster_jw,
     url_imdb,
+    short_description,
     watch_count
 FROM DB_TEAM_9.PUBLIC.monthly_top20_recent_movies
 WHERE anchor_date = DATE_TRUNC('MONTH', CAST(? AS DATE))
