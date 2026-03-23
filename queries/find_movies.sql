@@ -21,9 +21,14 @@ movies AS (
         o.release_year,
         o.release_date,
         o.imdb_score,
-        o.genre_tmdb
+        o.genre_tmdb,
+        o.runtime,
+        o.poster_jw,
+        o.url_imdb
     FROM DB_JW_SHARED.CHALLENGE.OBJECTS o
     WHERE LOWER(o.object_type) = 'movie'
+      AND o.imdb_score > 6
+      AND o.show_season_id IS NULL
 ),
 
 genre_matches AS (
@@ -69,6 +74,9 @@ scored AS (
         m.release_year,
         m.release_date,
         m.imdb_score,
+        m.runtime,
+        m.poster_jw,
+        m.url_imdb,
         m.short_description,
         m.object_text_short_description,
         COALESCE(gm.matched_genre_count, 0) AS matched_genre_count,
@@ -94,6 +102,9 @@ SELECT
     release_year,
     release_date,
     imdb_score,
+    runtime,
+    poster_jw,
+    url_imdb,
     matched_genre_count,
     matched_keyword_count,
     matched_genres,
