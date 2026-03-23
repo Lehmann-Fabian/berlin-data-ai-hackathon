@@ -1,0 +1,63 @@
+version: 2
+
+semantic_models:
+  - name: movie_popularity_rolling_29d_top20
+    description: >
+      Semantic model over rolling 29-day (±14) movie popularity ranks, partitioned by
+      anchor_date × app_locale × genre_bucket. Intended for “around a date” recommendations
+      (e.g., Xmas) and Lightdash exploration.
+    model: ref('mart_movie_popularity_rolling_29d_top20')
+
+    defaults:
+      agg_time_dimension: anchor_date
+
+    entities:
+      - name: rolling_movie_popularity
+        type: primary
+        expr: rolling_popularity_id
+      - name: title
+        type: foreign
+        expr: object_id
+      - name: market
+        type: foreign
+        expr: app_locale
+
+    dimensions:
+      - name: anchor_date
+        type: time
+        type_params:
+          time_granularity: day
+        expr: anchor_date
+      - name: app_locale
+        type: categorical
+        expr: app_locale
+      - name: genre_bucket
+        type: categorical
+        expr: genre_bucket
+      - name: movie_title
+        type: categorical
+        expr: movie_title
+      - name: genres
+        type: categorical
+        expr: genres
+      - name: poster_jw
+        type: categorical
+        expr: poster_jw
+      - name: url_imdb
+        type: categorical
+        expr: url_imdb
+      - name: url_tmdb
+        type: categorical
+        expr: url_tmdb
+
+    measures:
+      - name: clickouts_29d
+        description: Total clickouts in the rolling 29-day window (sums to selected grain).
+        agg: sum
+        expr: clickouts_29d
+      - name: weighted_clickouts_29d
+        description: >
+          Triangular-weighted clickouts in the rolling 29-day window (sums to selected grain).
+          Use this for recommendation ranking around an anchor date.
+        agg: sum
+        expr: weighted_clickouts_29d

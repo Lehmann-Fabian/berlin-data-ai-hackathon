@@ -11,7 +11,7 @@ pip install dbt-snowflake
 dbt needs a `profiles.yml` to connect to Snowflake. Create one at `~/.dbt/profiles.yml`:
 
 ```yaml
-dbt_template:
+db_team_<N>:
   outputs:
     dev:
       type: snowflake
@@ -19,13 +19,13 @@ dbt_template:
       user: "<your-email>"
       password: "<your-password>"
       database: DB_TEAM_<N>          # ← your team's private database (e.g. DB_TEAM_1)
-      schema: base
+      schema: base                  # default schema; models override to staging/intermediate/marts
       warehouse: WH_TEAM_<N>_XS     # ← your team's warehouse (e.g. WH_TEAM_1_XS)
       threads: 4
   target: dev
 ```
 
-Replace `<ACCOUNT_ID>`, your credentials, and `<N>` with your team number. The `database` must be your team database — this is where dbt will create views and tables that Lightdash can read.
+Replace `<ACCOUNT_ID>`, your credentials, and `<N>` with your team number. The `database` must be your team database — this is where dbt will create schemas/views/tables that Lightdash can read.
 
 ## Verify connection
 
@@ -37,7 +37,7 @@ dbt debug
 ## Build base models
 
 ```bash
-dbt run
+dbt build --select staging.* intermediate.* marts.*
 ```
 
-After `dbt run`, you should see views like `DB_TEAM_<N>.base.base_events_t1`, `DB_TEAM_<N>.base.base_objects`, etc. in Snowflake.
+After `dbt build`, you should see relations like `DB_TEAM_<N>.STAGING.BASE_EVENTS_T1`, `DB_TEAM_<N>.INTERMEDIATE.INT_FCT_CLICKOUTS`, and `DB_TEAM_<N>.MARTS.MART_POPULAR_MOVIES_DATASET_PERIOD` in Snowflake (schema names are configured in `platforms/dbt/dbt_project.yml`).

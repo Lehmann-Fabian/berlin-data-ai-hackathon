@@ -1,0 +1,58 @@
+version: 2
+
+semantic_models:
+  - name: clickouts
+    description: >
+      Semantic model for human clickout events (recommendation intent proxy).
+      Backed by the fct_clickouts mart.
+    model: ref('fct_clickouts')
+
+    defaults:
+      agg_time_dimension: collector_tstamp
+
+    entities:
+      - name: clickout_event
+        type: primary
+        expr: rid
+      - name: user
+        type: foreign
+        expr: user_id
+      - name: session
+        type: foreign
+        expr: session_id
+      - name: title
+        type: foreign
+        expr: title_jw_entity_id
+      - name: provider
+        type: foreign
+        expr: clickout_provider_id
+
+    dimensions:
+      - name: collector_tstamp
+        type: time
+        type_params:
+          time_granularity: day
+        expr: collector_tstamp
+      - name: app_locale
+        type: categorical
+        expr: app_locale
+      - name: platform
+        type: categorical
+        expr: platform
+      - name: monetization_type
+        type: categorical
+        expr: clickout_monetization_type
+
+    measures:
+      - name: clickouts
+        description: Total clickout events.
+        agg: count
+        expr: rid
+      - name: unique_users
+        description: Distinct devices/users generating clickouts.
+        agg: count_distinct
+        expr: user_id
+      - name: unique_sessions
+        description: Distinct sessions generating clickouts.
+        agg: count_distinct
+        expr: session_id

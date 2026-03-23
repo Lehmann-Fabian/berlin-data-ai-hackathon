@@ -4,3 +4,9 @@
 # Logs
 logs/
 *.log
+
+# dbt artifacts (local)
+platforms/dbt/target/
+platforms/dbt/logs/
+platforms/dbt/dbt_packages/
+platforms/dbt/.user.yml

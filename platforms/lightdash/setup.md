@@ -54,9 +54,35 @@ After deploying, your dbt models appear under **Explore** in the Lightdash UI.
 After adding or changing dbt models:
 
 ```bash
-dbt run
+dbt build --select staging.* intermediate.* marts.*
 lightdash deploy
 ```
+
+## “Xmas movie” recommendations (final product)
+
+Use the daily popularity mart `marts.mart_movie_popularity_daily_top50` to answer:
+"What are the top movies in a given time window (e.g. around Xmas)?".
+
+For “around a date” recommendations with a rolling ±14 day window (recommended for the chatbot),
+use `marts.mart_movie_popularity_rolling_29d_top20`.
+
+**Suggested Explore setup:**
+- Explore: `mart_movie_popularity_daily_top50`
+- Filter: `event_date` between your desired dates
+- Metric: `clickouts` (sum)
+- Dimension: `movie_title`
+- Optional breakdown: `app_locale`
+
+**Suggested Explore setup (rolling window, chatbot-ready):**
+- Explore: `mart_movie_popularity_rolling_29d_top20`
+- Filter: `anchor_date` = your target date (e.g. Dec 25)
+- Filter: `genre_bucket` = `__all__` (or a specific genre/bucket like `RomCom`)
+- Metric: `weighted_clickouts_29d` (sum)
+- Dimension: `movie_title`
+
+**Chart options:**
+- Top movies in a window: Table chart sorted by `clickouts`
+- Distribution by date: Line chart with `event_date` on X, `clickouts` on Y, series = `movie_title` (limit to top N)
 
 ## End-to-end flow
 
@@ -65,10 +91,10 @@ lightdash deploy
 │  DB_JW_SHARED.CHALLENGE     DB_TEAM_<N>        Lightdash       │
 │  (shared, read-only)        (your team DB)     (your project)  │
 │                                                                 │
-│  T1, T2, T3, T4  ──dbt──▶  base.base_events   ──deploy──▶     │
-│  OBJECTS          ──dbt──▶  base.base_objects      Explore      │
-│  PACKAGES         ──dbt──▶  base.base_packages     (charts &   │
-│                             marts.your_model        dashboards) │
+│  T1–T4             ──dbt──▶  staging.base_events_* ──deploy──▶ │
+│  OBJECTS/PACKAGES   ──dbt──▶  staging.base_objects/packages     │
+│                             intermediate.int_*                 │
+│                             marts.dim_*/fct_*/mart_*   Explore │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

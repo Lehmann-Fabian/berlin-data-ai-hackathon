@@ -1,0 +1,210 @@
+version: 2
+
+models:
+  - name: metricflow_time_spine
+    description: >
+      Time spine model required by dbt's semantic layer (MetricFlow). Contains a contiguous
+      daily date series in the `date_day` column.
+    meta:
+      metricflow_time_spine: true
+    columns:
+      - name: date_day
+        description: One row per day.
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_titles
+    description: BI-facing title dimension for movies and shows.
+    columns:
+      - name: object_id
+        description: Primary key for the title object.
+        tests:
+          - not_null
+          - unique
+      - name: object_type
+        description: Content type (movie/show).
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['movie', 'show']
+
+  - name: dim_providers
+    description: BI-facing provider dimension.
+    columns:
+      - name: id
+        description: Provider id.
+        tests:
+          - not_null
+          - unique
+
+  - name: fct_clickouts
+    description: BI-facing clickout fact at event grain, filtered to human traffic.
+    columns:
+      - name: rid
+        description: Primary key for the clickout event row.
+        tests:
+          - not_null
+          - unique
+      - name: title_jw_entity_id
+        description: >
+          Title join key to OBJECTS.object_id (see staging `sources.yml` join guidance).
+          Note that `dim_titles` filters to movies/shows, while the fact can include other object types.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('base_objects')
+                field: object_id
+      - name: clickout_provider_id
+        description: Provider join key to dim_providers.id.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_providers')
+                field: id
+      - name: platform
+        description: Platform code.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['web', 'mob']
+      - name: event
+        description: Snowplow event type for the clickout row.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['struct']
+      - name: se_category
+        description: Structured event category.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['clickout']
+
+  - name: mart_popular_movies_dataset_period
+    description: >
+      Popular movies for the available dataset period, aggregated by market (app_locale),
+      provider, and movie. Not intended to represent a full calendar year.
+    columns:
+      - name: app_locale
+        description: User-selected market.
+      - name: clickout_provider_id
+        description: Provider id.
+      - name: object_id
+        description: Movie object id (joins to dim_titles.object_id).
+      - name: clickouts
+        description: Total clickouts for this (market, provider, movie).
+      - name: unique_users
+        description: Unique devices/users (user_id) who produced clickouts.
+      - name: unique_sessions
+        description: Unique sessions that produced clickouts.
+
+  - name: mart_movie_popularity_daily_top50
+    description: >
+      Lightdash-ready daily movie popularity distribution (Top 50 per day per market),
+      derived from human clickout events. Use this to answer “top movies in a date range”
+      (e.g., around Xmas) and to chart popularity by date.
+    columns:
+      - name: event_date
+        description: UTC date of the clickout event (derived from collector_tstamp).
+        tests:
+          - not_null
+      - name: app_locale
+        description: User-selected market (may be NULL on some events).
+      - name: object_id
+        description: Movie object id (joins to dim_titles.object_id).
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_titles')
+                field: object_id
+      - name: movie_title
+        description: Display title for the movie.
+      - name: original_title
+        description: Original title (if provided by JustWatch).
+      - name: translated_title
+        description: Translated title (if provided by JustWatch).
+      - name: short_description
+        description: Short description text for the movie (if provided).
+      - name: object_text_short_description
+        description: Alternate short description text field (if provided).
+      - name: genres
+        description: Comma-separated TMDB genres for the movie (derived from OBJECTS.genre_tmdb).
+      - name: poster_jw
+        description: JustWatch poster image URL.
+      - name: url_imdb
+        description: Full IMDb URL for the title (when available).
+      - name: url_tmdb
+        description: Full TMDB URL for the title (when available).
+      - name: clickouts
+        description: Clickout event count for this (date, market, movie).
+        tests:
+          - not_null
+      - name: unique_users
+        description: Unique users (user_id) with clickouts for this (date, market, movie).
+      - name: unique_sessions
+        description: Unique sessions with clickouts for this (date, market, movie).
+      - name: daily_rank
+        description: Rank (1..50) of movie popularity within (event_date, app_locale).
+      - name: daily_popularity_id
+        description: Stable identifier for (event_date, app_locale, object_id).
+
+  - name: mart_movie_popularity_rolling_29d_top20
+    description: >
+      Rolling 29-day (±14) movie popularity ranks for “around a date” recommendations.
+      Output is Top 20 movies per (anchor_date, app_locale, genre_bucket), where genre_bucket
+      includes '__all__', single genres, and curated multi-genre buckets.
+    columns:
+      - name: anchor_date
+        description: Anchor date (center) of the rolling window.
+        tests:
+          - not_null
+      - name: window_start_date
+        description: Start date of the rolling window (anchor_date - 14 days).
+      - name: window_end_date
+        description: End date of the rolling window (anchor_date + 14 days).
+      - name: app_locale
+        description: User-selected market (may be NULL on some events).
+      - name: genre_bucket
+        description: Genre bucket identifier ('__all__', single genre, or curated bucket).
+        tests:
+          - not_null
+      - name: object_id
+        description: Movie object id (joins to dim_titles.object_id).
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_titles')
+                field: object_id
+      - name: clickouts_29d
+        description: Total clickouts in the rolling window for this partition.
+        tests:
+          - not_null
+      - name: weighted_clickouts_29d
+        description: >
+          Triangular-weighted clickouts in the rolling window (anchor_date has highest weight;
+          linear decay to the window edges).
+        tests:
+          - not_null
+      - name: window_rank
+        description: >
+          Rank (1..20) within (anchor_date, app_locale, genre_bucket) by weighted_clickouts_29d
+          (triangular weighting), with clickouts_29d as a tie-breaker.
+        tests:
+          - not_null
+      - name: rolling_popularity_id
+        description: Stable identifier for (anchor_date, app_locale, genre_bucket, object_id).
+      - name: movie_title
+        description: Display title for the movie.
+      - name: genres
+        description: Comma-separated TMDB genres for the movie.
+      - name: poster_jw
+        description: JustWatch poster image URL.
+      - name: url_imdb
+        description: Full IMDb URL for the title (when available).
+      - name: url_tmdb
+        description: Full TMDB URL for the title (when available).
