@@ -1,29 +1,30 @@
--- Convenience view: "movie recommendations for a given date".
+-- Movie recommendations for a user-provided `search_date`.
 --
--- This keeps the output columns aligned with the ad-hoc query pattern:
--- - pick a search_date
--- - find the matching seasonal window
--- - return Top 10 scored movies
+-- This is an *example query template* intended for apps/websites (OpenClaw, CineClaw UI, etc.).
+-- The date filter belongs in the consumer query (runtime), not inside the precomputed table model.
 --
--- Provide the date at build-time via dbt vars:
---   dbt build --select marts.mart_movie_recommendations_for_search_date --vars '{"search_date":"2026-01-01"}'
+-- Inputs
+-- - search_date: replace the literal in the params CTE (or bind it in your client).
+--
+-- Source table
+-- - marts.mart_seasonal_window_movie_recommendations_top10
 
 with params as (
 
-    select to_date('{{ var("search_date", "2026-01-01") }}') as search_date
+    select '2026-01-01'::date as search_date
 
 ),
 
 season_row as (
 
     select
-        w.start_date,
-        w.until_date,
-        w.period_description
-    from {{ ref('int_seasonal_movie_windows_2026') }} w
+        start_date,
+        until_date,
+        period_description
+    from {{ ref('int_seasonal_movie_windows_2026') }}
     cross join params p
-    where p.search_date >= w.start_date
-      and p.search_date <= w.until_date
+    where p.search_date >= start_date
+      and p.search_date <= until_date
 
 )
 

@@ -310,8 +310,3 @@ models:
         description: Rank (1..10) within (start_date, until_date) by total_score.
         tests:
           - not_null
-
-  - name: mart_movie_recommendations_for_search_date
-    description: >
-      Convenience view that returns the Top 10 scored movie recommendations for a single
-      build-time `search_date` (passed via dbt `--vars`). Output columns match the app query shape.
