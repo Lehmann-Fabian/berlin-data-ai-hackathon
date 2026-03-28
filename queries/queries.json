@@ -1,0 +1,58 @@
+{
+  "family_movie_night": {
+    "description": "fast family-friendly picks for a seasonal anchor (DD.MM) using family-oriented genre buckets",
+    "sql": "select * from openclaw.openclaw_family_movie_night"
+  },
+  "recommendations_by_genre": {
+    "description": "top recommendations for a genre bucket at a seasonal anchor (DD.MM) (single-genre or curated bucket like RomCom)",
+    "sql": "select * from openclaw.openclaw_recommendations_by_genre"
+  },
+  "recommendations_by_mood": {
+    "description": "mood-based recommendations using a simple mood→genre_bucket mapping on the seasonal popularity mart (DD.MM)",
+    "sql": "select * from openclaw.openclaw_recommendations_by_mood"
+  },
+  "similar_movies": {
+    "description": "movies similar to a given movie using genre overlap (demo source movie is chosen data-driven at build time)",
+    "sql": "select * from openclaw.openclaw_similar_movies"
+  },
+  "personalized_recommendations": {
+    "description": "personalized movie recommendations for a demo user based on recent clickout genre mix + seasonal popularity (DD.MM)",
+    "sql": "select * from openclaw.openclaw_personalized_recommendations"
+  },
+  "top_movies_seasonal_across_years": {
+    "description": "top movies for a recurring seasonal day+month (DD.MM) aggregated across all years",
+    "sql": "select * from openclaw.openclaw_top_movies_seasonal_across_years"
+  },
+  "top_movies_around_date": {
+    "description": "top movies around a specific calendar date (±14 days), ranked with triangular weighting",
+    "sql": "select * from openclaw.openclaw_top_movies_around_date"
+  },
+  "top_movies_around_date_by_keyword": {
+    "description": "top movies around a date with a baked-in keyword match in title/description (simple text match)",
+    "sql": "select * from openclaw.openclaw_top_movies_around_date_by_keyword"
+  },
+  "daily_trending_movies": {
+    "description": "daily trending movies for a specific day (top 50 per day/market, unweighted)",
+    "sql": "select * from openclaw.openclaw_daily_trending_movies"
+  },
+  "seasonal_window_recommendations_for_date": {
+    "description": "curated seasonal-window recommendations for a baked-in demo date (genre + keyword scoring, not telemetry-based)",
+    "sql": "select * from openclaw.openclaw_seasonal_window_recommendations_for_date"
+  },
+  "movie_details_by_object_id": {
+    "description": "movie details (description, poster, external URLs) for the demo source movie",
+    "sql": "select * from openclaw.openclaw_movie_details_by_object_id"
+  },
+  "search_movies_by_keyword": {
+    "description": "search movies by a baked-in keyword in title/description (fast catalog lookup)",
+    "sql": "select * from openclaw.openclaw_search_movies_by_keyword"
+  },
+  "top_movies_in_date_range": {
+    "description": "top movies in a baked-in date range (unweighted aggregate)",
+    "sql": "select * from openclaw.openclaw_top_movies_in_date_range"
+  },
+  "top_providers_in_date_window": {
+    "description": "top streaming providers by clickouts in a baked-in date window",
+    "sql": "select * from openclaw.openclaw_top_providers_in_date_window"
+  }
+}

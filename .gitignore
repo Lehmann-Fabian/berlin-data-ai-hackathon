@@ -1,7 +1,16 @@
 # Claude Code — personal/local settings
 .claude/settings.local.json
 
+# Python virtualenv
+.venv/
+
 # Logs
 logs/
 *.log
 /.env
+
+# dbt artifacts (local)
+platforms/dbt/target/
+platforms/dbt/logs/
+platforms/dbt/dbt_packages/
+platforms/dbt/.user.yml

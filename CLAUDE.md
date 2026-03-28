@@ -184,7 +184,7 @@ For full event details including se_label/se_property/se_value meanings, see `da
 
 ## dbt Template
 
-A starter dbt project is in `platforms/dbt/dbt_template/` with source definitions and base models. Teams can use this to organize SQL transformations if they prefer dbt over raw SQL. Requires a dbt profile configured for their team's Snowflake connection (see `platforms/dbt/profiles.md`).
+A starter dbt project is in `platforms/dbt/` with source definitions and a multi-layer model structure (staging → intermediate → marts). Teams can use this to organize SQL transformations if they prefer dbt over raw SQL. Requires a dbt profile configured for their team's Snowflake connection (see `platforms/dbt/profiles.md`).
 
 ## Repository Reference
 

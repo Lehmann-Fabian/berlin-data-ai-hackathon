@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: int_fct_clickouts
+    description: >
+      Intermediate clickout fact at event grain (one row per clickout event),
+      filtered to human traffic (not bots) and enriched with market and provider keys.
+    columns:
+      - name: clickout_event_id
+        description: Primary key for the clickout event row (event_source + rid).
+        tests:
+          - not_null
+          - unique
+      - name: event_source
+        description: Source event table label used to keep identifiers unique across unioned inputs (e.g., 'T1', 'T1_5').
+        tests:
+          - not_null
+      - name: rid
+        description: Internal row identifier within a source table. Use for deduplication (preferred over event_id).
+        tests:
+          - not_null
+      - name: title_jw_entity_id
+        description: Join key to title metadata (OBJECTS.object_id), derived from cc_title:jwEntityId.
+        tests:
+          - not_null
+      - name: clickout_provider_id
+        description: Join key to provider lookup (PACKAGES.id), derived from cc_clickout:providerId.
+        tests:
+          - not_null
+      - name: app_locale
+        description: User-selected market (distinct from geo_country).
+
+  - name: int_dim_titles
+    description: Curated title dimension for movies and shows (OBJECTS filtered to object_type in movie/show).
+    columns:
+      - name: object_id
+        description: Primary key for the title object.
+        tests:
+          - not_null
+          - unique
+      - name: object_type
+        description: Normalized content type (movie/show).
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['movie', 'show']
+
+  - name: int_dim_providers
+    description: Curated provider dimension (PACKAGES).
+    columns:
+      - name: id
+        description: Provider identifier (primary key).
+        tests:
+          - not_null
+          - unique
+
+  - name: int_bridge_title_genres
+    description: Bridge table expanding titles to individual genres (one row per title/genre).
+    columns:
+      - name: object_id
+        description: Title object id (joins to int_dim_titles.object_id).
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_dim_titles')
+                field: object_id
+      - name: genre
+        description: Genre label from TMDB (expanded from array).
+        tests:
+          - not_null

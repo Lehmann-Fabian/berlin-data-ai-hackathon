@@ -1,0 +1,74 @@
+version: 2
+
+semantic_models:
+  - name: movie_popularity_seasonal_ddmm_top20
+    description: >
+      Semantic model over multi-year seasonal movie popularity ranks anchored to day+month (DD.MM).
+      Use this for recurring seasonal recommendations like “top Xmas movies” across all years.
+    model: ref('mart_movie_popularity_seasonal_ddmm_top20')
+
+    defaults:
+      agg_time_dimension: anchor_day_date
+
+    entities:
+      - name: seasonal_movie_popularity
+        type: primary
+        expr: seasonal_popularity_id
+      - name: title
+        type: foreign
+        expr: object_id
+      - name: market
+        type: foreign
+        expr: app_locale
+
+    dimensions:
+      - name: anchor_day_date
+        type: time
+        type_params:
+          time_granularity: day
+        expr: anchor_day_date
+      - name: anchor_ddmm
+        type: categorical
+        expr: anchor_ddmm
+      - name: anchor_month
+        type: categorical
+        expr: anchor_month
+      - name: anchor_day
+        type: categorical
+        expr: anchor_day
+      - name: app_locale
+        type: categorical
+        expr: app_locale
+      - name: genre_bucket
+        type: categorical
+        expr: genre_bucket
+      - name: movie_title
+        type: categorical
+        expr: movie_title
+      - name: genres
+        type: categorical
+        expr: genres
+      - name: poster_jw
+        type: categorical
+        expr: poster_jw
+      - name: url_imdb
+        type: categorical
+        expr: url_imdb
+      - name: url_tmdb
+        type: categorical
+        expr: url_tmdb
+
+    measures:
+      - name: clickouts_29d_sum
+        description: Total (unweighted) clickouts in the ±14-day window, summed across years.
+        agg: sum
+        expr: clickouts_29d_sum
+      - name: weighted_clickouts_29d_sum
+        description: Triangular-weighted clickouts in the ±14-day window, summed across years.
+        agg: sum
+        expr: weighted_clickouts_29d_sum
+      - name: years_covered
+        description: Number of distinct dataset years contributing to this seasonal aggregate.
+        agg: max
+        expr: years_covered
+

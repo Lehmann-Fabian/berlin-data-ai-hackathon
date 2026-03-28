@@ -1,0 +1,67 @@
+version: 2
+
+semantic_models:
+  - name: movie_popularity_daily_top50
+    description: >
+      Semantic model over daily movie popularity (Top 50 per day per market),
+      for easy date-window “top movies” queries (e.g. Xmas recommendations) and Lightdash charts.
+    model: ref('mart_movie_popularity_daily_top50')
+
+    defaults:
+      agg_time_dimension: event_date
+
+    entities:
+      - name: daily_movie_popularity
+        type: primary
+        expr: daily_popularity_id
+      - name: title
+        type: foreign
+        expr: object_id
+      - name: market
+        type: foreign
+        expr: app_locale
+
+    dimensions:
+      - name: event_date
+        type: time
+        type_params:
+          time_granularity: day
+        expr: event_date
+      - name: app_locale
+        type: categorical
+        expr: app_locale
+      - name: movie_title
+        type: categorical
+        expr: movie_title
+      - name: genres
+        type: categorical
+        expr: genres
+      - name: release_year
+        type: categorical
+        expr: release_year
+      - name: short_description
+        type: categorical
+        expr: short_description
+      - name: poster_jw
+        type: categorical
+        expr: poster_jw
+      - name: url_imdb
+        type: categorical
+        expr: url_imdb
+      - name: url_tmdb
+        type: categorical
+        expr: url_tmdb
+
+    measures:
+      - name: clickouts
+        description: Total clickouts for the selected grain (sums daily clickouts).
+        agg: sum
+        expr: clickouts
+      - name: unique_users
+        description: "Sum of daily unique users (note: not de-duplicated across days)."
+        agg: sum
+        expr: unique_users
+      - name: unique_sessions
+        description: "Sum of daily unique sessions (note: not de-duplicated across days)."
+        agg: sum
+        expr: unique_sessions
