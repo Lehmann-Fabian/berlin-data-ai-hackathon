@@ -24,17 +24,6 @@ function formatRuntime(runtime) {
   return `${numericRuntime} min`;
 }
 
-function formatGermanDate(dateString) {
-  if (!dateString) {
-    return '';
-  }
-  const [year, month, day] = dateString.split('-');
-  if (!year || !month || !day) {
-    return dateString;
-  }
-  return `${day}.${month}.${year}`;
-}
-
 function formatDayMonth(dateString) {
   if (!dateString) {
     return '';
@@ -106,55 +95,57 @@ function MovieSection({ title, subtitle, movies, emptyCopy }) {
   );
 }
 
+async function fetchMoviePayload(url) {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return response.json();
+}
+
 export default function App() {
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const [selectedDate, setSelectedDate] = useState(today);
-  const [discoveryMovies, setDiscoveryMovies] = useState([]);
-  const [popularMovies, setPopularMovies] = useState([]);
-  const [recentMovies, setRecentMovies] = useState([]);
+  const [discoveryMovies, setDiscoveryMovies] = useState(null);
+  const [popularMovies, setPopularMovies] = useState(null);
+  const [recentMovies, setRecentMovies] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [lastLoadedDate, setLastLoadedDate] = useState('');
 
   async function loadMovies(date) {
     setLoading(true);
-    setError('');
 
     try {
-      const [discoveryResponse, popularResponse, recentResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/movies?date=${date}`),
-        fetch(`${API_BASE_URL}/api/movies/popular?date=${date}`),
-        fetch(`${API_BASE_URL}/api/movies/recent?date=${date}`)
-      ]);
-
-      if (!discoveryResponse.ok) {
-        throw new Error(`Discovery request failed with status ${discoveryResponse.status}`);
-      }
-      if (!popularResponse.ok) {
-        throw new Error(`Popularity request failed with status ${popularResponse.status}`);
-      }
-      if (!recentResponse.ok) {
-        throw new Error(`Recent movies request failed with status ${recentResponse.status}`);
-      }
+      setDiscoveryMovies(null);
+      setPopularMovies(null);
+      setRecentMovies(null);
 
       const [discoveryPayload, popularPayload, recentPayload] = await Promise.all([
-        discoveryResponse.json(),
-        popularResponse.json(),
-        recentResponse.json()
+        fetchMoviePayload(`${API_BASE_URL}/api/movies?date=${date}`),
+        fetchMoviePayload(`${API_BASE_URL}/api/movies/popular?date=${date}`),
+        fetchMoviePayload(`${API_BASE_URL}/api/movies/recent?date=${date}`)
       ]);
 
-      setDiscoveryMovies(Array.isArray(discoveryPayload.movies) ? discoveryPayload.movies : []);
-      setPopularMovies(Array.isArray(popularPayload.movies) ? popularPayload.movies : []);
-      setRecentMovies(Array.isArray(recentPayload.movies) ? recentPayload.movies : []);
+      if (discoveryPayload) {
+        setDiscoveryMovies(Array.isArray(discoveryPayload.movies) ? discoveryPayload.movies : []);
+      }
+      if (popularPayload) {
+        setPopularMovies(Array.isArray(popularPayload.movies) ? popularPayload.movies : []);
+      }
+      if (recentPayload) {
+        setRecentMovies(Array.isArray(recentPayload.movies) ? recentPayload.movies : []);
+      }
+
       setLastLoadedDate(
-        discoveryPayload.requestedDate || popularPayload.requestedDate || recentPayload.requestedDate || date
+        discoveryPayload?.requestedDate || popularPayload?.requestedDate || recentPayload?.requestedDate || date
       );
-    } catch (requestError) {
-      setDiscoveryMovies([]);
-      setPopularMovies([]);
-      setRecentMovies([]);
+    } catch {
+      setDiscoveryMovies(null);
+      setPopularMovies(null);
+      setRecentMovies(null);
       setLastLoadedDate('');
-      setError(requestError.message || 'Something went wrong while fetching movies.');
     } finally {
       setLoading(false);
     }
@@ -169,7 +160,6 @@ export default function App() {
     loadMovies(today);
   }, [today]);
 
-  const formattedDate = formatGermanDate(lastLoadedDate || selectedDate);
   const formattedDayMonth = formatDayMonth(lastLoadedDate || selectedDate);
 
   return (
@@ -196,35 +186,40 @@ export default function App() {
             </button>
           </div>
         </form>
-        {error ? <p className="error-copy">{error}</p> : null}
       </section>
 
       <section className="results-panel">
-        {discoveryMovies.length === 0 && popularMovies.length === 0 && recentMovies.length === 0 && !loading ? (
+        {discoveryMovies === null && popularMovies === null && recentMovies === null && !loading ? (
           <div className="empty-state">
             <p>No movies loaded yet.</p>
             <span>Choose a date and we will fill this page with ideas for what to watch.</span>
           </div>
         ) : (
           <div className="sections-stack">
-            <MovieSection
-              title="Newly published movies"
-              subtitle="Top 10 newer releases for the month of your selected date, using the first day of that month as the lookup anchor."
-              movies={recentMovies}
-              emptyCopy="We have no newly published movie data for this month."
-            />
-            <MovieSection
-              title={`What people watch usually around ${formattedDayMonth}`}
-              subtitle="The most popular movie picks in Germany around this date based on rolling watch behavior."
-              movies={popularMovies}
-              emptyCopy="We have no data for this date in the database."
-            />
-            <MovieSection
-              title="Movies you might not know"
-              subtitle="A curated pick of titles that best match the mood and themes around your selected date."
-              movies={discoveryMovies}
-              emptyCopy="No discovery picks were found for this date."
-            />
+            {recentMovies !== null ? (
+              <MovieSection
+                title="Newly published movies"
+                subtitle="Top 10 newer releases for the month of your selected date, using the first day of that month as the lookup anchor."
+                movies={recentMovies}
+                emptyCopy="We have no newly published movie data for this month."
+              />
+            ) : null}
+            {popularMovies !== null ? (
+              <MovieSection
+                title={`What people watch usually around ${formattedDayMonth}`}
+                subtitle="The most popular movie picks in Germany around this date based on rolling watch behavior."
+                movies={popularMovies}
+                emptyCopy="We have no data for this date in the database."
+              />
+            ) : null}
+            {discoveryMovies !== null ? (
+              <MovieSection
+                title="Movies you might not know"
+                subtitle="A curated pick of titles that best match the mood and themes around your selected date."
+                movies={discoveryMovies}
+                emptyCopy="No discovery picks were found for this date."
+              />
+            ) : null}
           </div>
         )}
       </section>
