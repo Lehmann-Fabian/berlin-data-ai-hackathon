@@ -1,3 +1,11 @@
+CREATE TABLE DB_TEAM_9.PUBLIC.SEASONAL_MOVIE_WINDOWS_2026 (
+    start_date DATE,
+    until_date DATE,
+    period_description VARCHAR,
+    popular_genre ARRAY,
+    description_keywords ARRAY
+)
+
 INSERT INTO seasonal_movie_windows_2026 (
     start_date,
     until_date,
