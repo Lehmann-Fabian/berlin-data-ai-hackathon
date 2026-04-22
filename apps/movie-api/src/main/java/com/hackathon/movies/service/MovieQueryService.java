@@ -48,13 +48,13 @@ public class MovieQueryService {
         return new MovieResponse(date, movies.size(), movies);
     }
 
-    @Cacheable(cacheNames = "popularMoviesByDate", key = "#date")
+    @Cacheable(cacheNames = "popularMoviesByDayMonth", key = "#date.format(T(java.time.format.DateTimeFormatter).ofPattern('dd.MM'))")
     public MovieResponse findPopularMovies(LocalDate date) {
         List<Map<String, Object>> movies = runDayMonthQuery(popularMoviesSql, date);
         return new MovieResponse(date, movies.size(), movies);
     }
 
-    @Cacheable(cacheNames = "recentMoviesByDate", key = "#date")
+    @Cacheable(cacheNames = "recentMoviesByMonth", key = "T(java.time.YearMonth).from(#date)")
     public MovieResponse findRecentMovies(LocalDate date) {
         List<Map<String, Object>> movies = runDateQuery(recentMoviesSql, date);
         return new MovieResponse(date, movies.size(), movies);
