@@ -1,4 +1,6 @@
-CREATE OR REPLACE TABLE DB_TEAM_9.PUBLIC.monthly_top20_recent_movies AS
+CREATE OR REPLACE TABLE DB_TEAM_9.PUBLIC.monthly_top20_recent_movies
+CLUSTER BY (anchor_date)
+AS
 
 WITH anchor_dates AS (
     SELECT '2026-01-01'::DATE AS anchor_date
