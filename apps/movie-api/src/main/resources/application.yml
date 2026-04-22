@@ -3,7 +3,7 @@ spring:
     name: movie-api
   datasource:
     driver-class-name: net.snowflake.client.jdbc.SnowflakeDriver
-    url: ${SPRING_DATASOURCE_URL:jdbc:snowflake://<ACCOUNT_ID>.snowflakecomputing.com/?db=DB_JW_SHARED&schema=CHALLENGE&warehouse=WH_TEAM_1_XS}
+    url: ${SPRING_DATASOURCE_URL:jdbc:snowflake://<ACCOUNT_ID>.snowflakecomputing.com/?db=DB_TEAM_9&schema=PUBLIC&warehouse=COMPUTE_WH}
     username: ${SPRING_DATASOURCE_USERNAME:<your-email>}
     password: ${SPRING_DATASOURCE_PASSWORD:<your-password>}
     hikari:
