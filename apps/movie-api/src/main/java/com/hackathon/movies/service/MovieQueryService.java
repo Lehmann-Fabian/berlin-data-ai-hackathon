@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackathon.movies.model.MovieResponse;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -41,16 +42,19 @@ public class MovieQueryService {
         this.recentMoviesSql = readSql("sql/recent_movies.sql");
     }
 
+    @Cacheable(cacheNames = "findMoviesByDate", key = "#date")
     public MovieResponse findMovies(LocalDate date) {
         List<Map<String, Object>> movies = runDateQuery(findMoviesSql, date);
         return new MovieResponse(date, movies.size(), movies);
     }
 
+    @Cacheable(cacheNames = "popularMoviesByDate", key = "#date")
     public MovieResponse findPopularMovies(LocalDate date) {
         List<Map<String, Object>> movies = runDayMonthQuery(popularMoviesSql, date);
         return new MovieResponse(date, movies.size(), movies);
     }
 
+    @Cacheable(cacheNames = "recentMoviesByDate", key = "#date")
     public MovieResponse findRecentMovies(LocalDate date) {
         List<Map<String, Object>> movies = runDateQuery(recentMoviesSql, date);
         return new MovieResponse(date, movies.size(), movies);
